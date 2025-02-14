@@ -4,11 +4,40 @@ import (
 	"database/sql"
 	"fmt"
 	"regexp"
+	"strconv"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestGetTableNames(t *testing.T) {
+	fmt.Println(" TestGetTableNames")
+	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer db.Close()
+
+	_, err = db.Exec("CREATE TABLE parent (id INTEGER PRIMARY KEY, name TEXT)")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	_, err = db.Exec("CREATE TABLE child (id INTEGER PRIMARY KEY, parent_id INTEGER, name TEXT)")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	tables, err := GetTableNames(db)
+	if err != nil { t.Error(err) }
+	assert.True(t, len(tables) == 2, "tables length is not 2: " + strconv.Itoa(len(tables)))
+	assert.True(t, tables[0] == "child", "tables[0] is not child")
+	assert.True(t, tables[1] == "parent", "tables[1] is not parent")
+}
 
 func TestGetFieldInfos(t *testing.T) {
 	fmt.Println(" TestGetFieldInfos")

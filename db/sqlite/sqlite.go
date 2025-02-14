@@ -5,6 +5,25 @@ import (
 	"strings"
 )
 
+func GetTableNames(db *sql.DB) ([]string, error) {
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tables []string
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			return nil, err
+		}
+		tables = append(tables, name)
+	}
+	return tables, nil
+}
+
 type FieldInfo struct {
 	Cid          int
 	Name         string
